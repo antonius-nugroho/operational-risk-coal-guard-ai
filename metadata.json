@@ -1,0 +1,6 @@
+{
+  "name": "Coal-Guard AI: Coal Power Plant Operational Risk Modeling",
+  "description": "User-authenticated operational risk, opportunity, and uncertainty quantification engine for Coal-Fired Power Plants leveraging Vertex AI, Gemini reasoning, BigQuery telemetry streams, and Monte Carlo stochastic simulations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

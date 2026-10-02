@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User profile and isolated resources
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Power Plant Risk Assessments and Simulations
+    match /users/{userId}/assessments/{assessmentId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Plant Historical Loss Events & Telemetry Ingestion
+    match /users/{userId}/lossEvents/{eventId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Ingested Failure Events (uploaded by authenticated user or session)
+    match /users/{userId}/failure_events/{eventId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Ingested Monthly Business Metrics (uploaded by authenticated user or session)
+    match /users/{userId}/business_metrics/{metricId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // BigQuery Ingestion Upload Metadata & Audit History
+    match /users/{userId}/upload_history/{historyId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User Workspace Preferences & Persistent Flags
+    match /users/{userId}/settings/{settingId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
