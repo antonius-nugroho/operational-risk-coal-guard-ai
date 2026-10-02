@@ -32,7 +32,7 @@ import {
 import { RawBusinessData, RawFailureData } from './types/datasetTypes';
 import { PlantConfig, LossEvent, TelemetryReading, MLRiskPrediction, MonteCarloOpportunityResult } from './types/riskModel';
 import { runGeminiWithFallback } from './lib/geminiService';
-import { formatCurrencyIDR } from './lib/formatters';
+import { formatCurrencyIDR, parseNumberSafe } from './lib/formatters';
 import { useAuth } from './context/AuthContext';
 import { db } from './lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -398,8 +398,10 @@ Format with:
               if (type === 'failure' && newRecords && newRecords.length > 0) {
                 // Enrich and add to failures
                 const enriched = newRecords.map((r, i) => {
-                  const mwh = Number(r.loss_output_mwh || r.lossOutputMwh || 0);
-                  const dur = Number(r.failure_duration_hours || r.failureDurationHours || 1);
+                  const rawMwh = parseNumberSafe(r.loss_output_mwh || r.lossOutputMwh || 0);
+                  const mwh = isNaN(rawMwh) ? 0 : rawMwh;
+                  const rawDur = parseNumberSafe(r.failure_duration_hours || r.failureDurationHours || 1);
+                  const dur = isNaN(rawDur) ? 1 : rawDur;
                   return {
                     id: r.id || `uploaded-fail-${Date.now()}-${i}`,
                     timestamp_start: r.timestamp_start || r.date || new Date().toISOString().split('T')[0],
@@ -409,10 +411,10 @@ Format with:
                     failure_cause_code: r.failure_cause_code || 'General system problem',
                     failure_mode: r.failure_mode || 'F060 Broken',
                     mitigation: r.mitigation || 'Corrective action taken',
-                    power_gross_realization: Number(r.power_gross_realization || 0),
-                    power_net_realization: Number(r.power_net_realization || 0),
+                    power_gross_realization: parseNumberSafe(r.power_gross_realization || 0) || 0,
+                    power_net_realization: parseNumberSafe(r.power_net_realization || 0) || 0,
                     failure_impact: r.failure_impact || 'Tripped',
-                    loss_output_mw: Number(r.loss_output_mw || 100),
+                    loss_output_mw: parseNumberSafe(r.loss_output_mw || 100) || 100,
                     timestamp_stop: r.timestamp_stop || '',
                     failure_duration_hour_minute: r.failure_duration_hour_minute || `${dur} hrs`,
                     failure_duration_hours: dur,
